@@ -131,3 +131,30 @@ services:
         condition: service_healthy
       discovery:
         condition: service_healthy
+
+  ticket:
+    build:
+      context: .
+      dockerfile: ticket-service/Dockerfile
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      DB_USER: ticket_user
+      DB_PASSWORD: ${TICKET_DB_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
+      EUREKA_URL: http://discovery:8761/eureka
+    ports:
+      - "8084:8084"
+    volumes:
+      - tickets:/app/tickets
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+
+volumes:
+  tickets:

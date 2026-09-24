@@ -1,4 +1,4 @@
-package com.sehaaz.eventtix.order.config;
+package com.sehaaz.eventtix.ticket.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Binding;
@@ -16,17 +16,11 @@ import org.springframework.context.annotation.Configuration;
 import static com.sehaaz.eventtix.common.messaging.SagaMessaging.DLQ_SUFFIX;
 import static com.sehaaz.eventtix.common.messaging.SagaMessaging.DLX;
 import static com.sehaaz.eventtix.common.messaging.SagaMessaging.EXCHANGE;
-import static com.sehaaz.eventtix.common.messaging.SagaMessaging.ORDER_QUOTA_REJECTED_QUEUE;
-import static com.sehaaz.eventtix.common.messaging.SagaMessaging.ORDER_QUOTA_RESERVED_QUEUE;
-import static com.sehaaz.eventtix.common.messaging.SagaMessaging.ORDER_TICKET_FAILED_QUEUE;
-import static com.sehaaz.eventtix.common.messaging.SagaMessaging.ORDER_TICKET_GENERATED_QUEUE;
-import static com.sehaaz.eventtix.common.messaging.SagaMessaging.QUOTA_REJECTED;
-import static com.sehaaz.eventtix.common.messaging.SagaMessaging.QUOTA_RESERVED;
-import static com.sehaaz.eventtix.common.messaging.SagaMessaging.TICKET_FAILED;
-import static com.sehaaz.eventtix.common.messaging.SagaMessaging.TICKET_GENERATED;
+import static com.sehaaz.eventtix.common.messaging.SagaMessaging.ORDER_CONFIRMED;
+import static com.sehaaz.eventtix.common.messaging.SagaMessaging.TICKET_GENERATE_QUEUE;
 
 /**
- * order-service'in tükettiği queue'lar: quota.reserved, quota.rejected, ticket.generated ve ticket.failed.
+ * ticket-service'in tükettiği queue: order.confirmed → bilet üret.
  */
 @Configuration
 public class RabbitConfig {
@@ -42,23 +36,8 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Declarables quotaReservedQueue() {
-        return sagaQueue(ORDER_QUOTA_RESERVED_QUEUE, QUOTA_RESERVED);
-    }
-
-    @Bean
-    public Declarables quotaRejectedQueue() {
-        return sagaQueue(ORDER_QUOTA_REJECTED_QUEUE, QUOTA_REJECTED);
-    }
-
-    @Bean
-    public Declarables ticketGeneratedQueue() {
-        return sagaQueue(ORDER_TICKET_GENERATED_QUEUE, TICKET_GENERATED);
-    }
-
-    @Bean
-    public Declarables ticketFailedQueue() {
-        return sagaQueue(ORDER_TICKET_FAILED_QUEUE, TICKET_FAILED);
+    public Declarables ticketGenerateQueue() {
+        return sagaQueue(TICKET_GENERATE_QUEUE, ORDER_CONFIRMED);
     }
 
     @Bean

@@ -1,5 +1,7 @@
 package com.sehaaz.eventtix.order.domain;
 
+import com.sehaaz.eventtix.common.event.OrderCancelledEvent;
+import com.sehaaz.eventtix.common.event.OrderCompletedEvent;
 import com.sehaaz.eventtix.common.event.OrderConfirmedEvent;
 import com.sehaaz.eventtix.common.event.OrderCreatedEvent;
 import com.sehaaz.eventtix.common.event.OrderFailedEvent;
@@ -20,6 +22,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
+import static com.sehaaz.eventtix.common.messaging.SagaMessaging.ORDER_CANCELLED;
+import static com.sehaaz.eventtix.common.messaging.SagaMessaging.ORDER_COMPLETED;
 import static com.sehaaz.eventtix.common.messaging.SagaMessaging.ORDER_CONFIRMED;
 import static com.sehaaz.eventtix.common.messaging.SagaMessaging.ORDER_CREATED;
 import static com.sehaaz.eventtix.common.messaging.SagaMessaging.ORDER_FAILED;
@@ -77,7 +81,7 @@ public class OrderService {
 
     @Transactional
     public void onQuotaReserved(Long orderId) {
-        Order order = pendingOrder(orderId);
+        Order order = orderIn(orderId, OrderStatus.PENDING);
         if (order == null) {
             return;
         }
@@ -89,7 +93,7 @@ public class OrderService {
 
     @Transactional
     public void onQuotaRejected(Long orderId) {
-        Order order = pendingOrder(orderId);
+        Order order = orderIn(orderId, OrderStatus.PENDING);
         if (order == null) {
             return;
         }
@@ -100,13 +104,40 @@ public class OrderService {
                 orderId, ORDER_FAILED, clock.instant(), order.getUserId(), FailureReason.QUOTA.name()));
     }
 
+    @Transactional
+    public void onTicketGenerated(Long orderId) {
+        Order order = orderIn(orderId, OrderStatus.QUOTA_RESERVED);
+        if (order == null) {
+            return;
+        }
+        order.setStatus(OrderStatus.COMPLETED);
+        order.setUpdatedAt(clock.instant());
+        publisher.publishAfterCommit(ORDER_COMPLETED, new OrderCompletedEvent(
+                orderId, ORDER_COMPLETED, clock.instant(), order.getUserId(), order.getEventTitle(),
+                order.getQuantity()));
+    }
+
+    @Transactional
+    public void onTicketFailed(Long orderId) {
+        Order order = orderIn(orderId, OrderStatus.QUOTA_RESERVED);
+        if (order == null) {
+            return;
+        }
+        order.setStatus(OrderStatus.FAILED);
+        order.setFailureReason(FailureReason.TICKET);
+        order.setUpdatedAt(clock.instant());
+        publisher.publishAfterCommit(ORDER_CANCELLED, new OrderCancelledEvent(
+                orderId, ORDER_CANCELLED, clock.instant(), order.getUserId(), order.getEventId(),
+                order.getQuantity(), FailureReason.TICKET.name()));
+    }
+
     /**
-     * Sadece PENDING siparişler ilerler; tekrar gelen mesajda null döner (idempotency).
+     * Sadece beklenen durumdaki siparişler ilerler; tekrar gelen mesajda null döner (idempotency).
      */
-    private Order pendingOrder(Long orderId) {
+    private Order orderIn(Long orderId, OrderStatus expected) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalStateException("Sipariş bulunamadı: " + orderId));
-        if (order.getStatus() != OrderStatus.PENDING) {
+        if (order.getStatus() != expected) {
             log.info("Sipariş {} zaten {} durumunda, mesaj atlandı", orderId, order.getStatus());
             return null;
         }

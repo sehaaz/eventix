@@ -1,3 +1,12 @@
+## Mimari kaynak
+- Mimari: PROJE-1-EventTix-Mimari.md. Mimariye aykırı bir şey yapma; aykırı bir şey gerekiyorsa önce sor.
+
+## Teknik kurallar
+- Her servis Spring Boot 3 + Java 21. Paket yapısı: config / api / domain / messaging / common.
+- Lombok kullan. DTO'lar record.
+- Veritabanı şeması sadece Flyway ile yönetilir, `ddl-auto: validate`.
+- Testler JUnit 5 + Mockito; entegrasyon testleri Testcontainers.
+
 ## Sadelik / Overengineering yasak
 - İstenen değişikliğin en küçük hâlini yap. 200 satır yazdıysan ve 50 yeterliyse, 50'ye indir.
 - İstenmeyen özellik, config, "esneklik" veya soyutlama ekleme.

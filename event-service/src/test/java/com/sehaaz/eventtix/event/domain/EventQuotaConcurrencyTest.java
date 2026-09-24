@@ -20,7 +20,10 @@ import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(properties = "eureka.client.enabled=false")
+@SpringBootTest(properties = {
+        "eureka.client.enabled=false",
+        "spring.rabbitmq.listener.simple.auto-startup=false"
+})
 @Testcontainers
 class EventQuotaConcurrencyTest {
 

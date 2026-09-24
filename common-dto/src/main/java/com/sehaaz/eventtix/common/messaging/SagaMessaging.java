@@ -3,6 +3,8 @@ package com.sehaaz.eventtix.common.messaging;
 public final class SagaMessaging {
 
     public static final String EXCHANGE = "eventtix.exchange";
+    public static final String DLX = "eventtix.dlx";
+    public static final String DLQ_SUFFIX = ".dlq";
 
     public static final String ORDER_CREATED = "order.created";
     public static final String QUOTA_RESERVED = "quota.reserved";

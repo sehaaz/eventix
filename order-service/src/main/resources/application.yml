@@ -1,22 +1,22 @@
 server:
-  port: 8082
+  port: 8083
 
 spring:
   application:
-    name: event-service
+    name: order-service
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/eventtix}
-    username: ${DB_USER:event_user}
-    password: ${DB_PASSWORD:event_pass}
+    username: ${DB_USER:order_user}
+    password: ${DB_PASSWORD:order_pass}
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
-        default_schema: event_schema
+        default_schema: order_schema
   flyway:
-    schemas: event_schema
-    default-schema: event_schema
+    schemas: order_schema
+    default-schema: order_schema
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     username: ${RABBITMQ_USER:eventtix}

@@ -1,0 +1,26 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: event-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/eventtix}
+    username: ${DB_USER:event_user}
+    password: ${DB_PASSWORD:event_pass}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: event_schema
+  flyway:
+    schemas: event_schema
+    default-schema: event_schema
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true

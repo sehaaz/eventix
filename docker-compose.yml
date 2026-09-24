@@ -69,3 +69,38 @@ services:
     depends_on:
       discovery:
         condition: service_healthy
+
+  auth:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      DB_USER: auth_user
+      DB_PASSWORD: ${AUTH_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      EUREKA_URL: http://discovery:8761/eureka
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+
+  event:
+    build:
+      context: .
+      dockerfile: event-service/Dockerfile
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      DB_USER: event_user
+      DB_PASSWORD: ${EVENT_DB_PASSWORD}
+      EUREKA_URL: http://discovery:8761/eureka
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy

@@ -71,4 +71,11 @@ public class TicketService {
                 .map(ticket -> Path.of(ticket.getPdfPath()))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "TICKET_NOT_FOUND", "Bilet bulunamadı"));
     }
+
+    @Transactional(readOnly = true)
+    public Path qrOf(Long userId, String ticketCode) {
+        return ticketRepository.findByTicketCodeAndUserId(ticketCode, userId)
+                .map(ticket -> Path.of(ticket.getQrPath()))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "TICKET_NOT_FOUND", "Bilet bulunamadı"));
+    }
 }

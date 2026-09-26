@@ -40,4 +40,11 @@ public class TicketController {
                         ContentDisposition.attachment().filename(code + ".pdf").build().toString())
                 .body(pdf);
     }
+
+    @GetMapping("/{code}/qr")
+    public ResponseEntity<Resource> qr(@RequestHeader(USER_ID_HEADER) Long userId, @PathVariable String code) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(new FileSystemResource(ticketService.qrOf(userId, code)));
+    }
 }

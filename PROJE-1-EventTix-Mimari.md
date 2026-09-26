@@ -208,6 +208,7 @@ CREATE UNIQUE INDEX uq_tickets_order ON tickets(order_id, seq_no);
 | GET | `/api/orders/{id}` | order-service | USER |
 | GET | `/api/tickets/me` | ticket-service | USER |
 | GET | `/api/tickets/{code}/pdf` | ticket-service | USER |
+| GET | `/api/tickets/{code}/qr` | ticket-service | USER |
 
 **Gateway'in işi:** JWT imzasını doğrular, `X-User-Id` ve `X-User-Role` header'larını ekleyip aşağı iletir. İş servisleri JWT parse etmez, bu header'lara güvenir — ağ dışarıya kapalı olduğu için (compose network) kabul edilebilir, README'de not düşülür.
 

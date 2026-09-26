@@ -7,6 +7,7 @@ public record OrderCompletedEvent(
         String eventType,
         Instant occurredAt,
         Long userId,
+        String userEmail,
         String eventTitle,
         int quantity
 ) implements SagaEvent {

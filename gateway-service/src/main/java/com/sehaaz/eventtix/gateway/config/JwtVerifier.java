@@ -14,7 +14,7 @@ import java.util.Base64;
 import java.util.Optional;
 
 /**
- * HS256 JWT doğrulaması: imza, alg ve exp kontrol edilir; sub = userId, role = rol.
+ * HS256 JWT doğrulaması: imza, alg ve exp kontrol edilir; sub = userId, role = rol, email = e-posta.
  */
 public class JwtVerifier {
 
@@ -62,15 +62,17 @@ public class JwtVerifier {
 
             String userId = payload.path("sub").textValue();
             String role = payload.path("role").textValue();
-            if (userId == null || userId.isBlank() || role == null || role.isBlank()) {
+            String email = payload.path("email").textValue();
+            if (userId == null || userId.isBlank() || role == null || role.isBlank()
+                    || email == null || email.isBlank()) {
                 return Optional.empty();
             }
-            return Optional.of(new Claims(userId, role));
+            return Optional.of(new Claims(userId, role, email));
         } catch (IllegalArgumentException | IOException | GeneralSecurityException e) {
             return Optional.empty();
         }
     }
 
-    public record Claims(String userId, String role) {
+    public record Claims(String userId, String role, String email) {
     }
 }

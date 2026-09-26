@@ -39,7 +39,7 @@ public class OrderService {
     private final TransactionTemplate transactionTemplate;
     private final Clock clock;
 
-    public OrderResponse create(Long userId, CreateOrderRequest request) {
+    public OrderResponse create(Long userId, String userEmail, CreateOrderRequest request) {
         // HTTP çağrısı transaction dışında: DB bağlantısı event-service'i beklerken tutulmasın.
         EventClient.EventDetails event = fetchEvent(request.eventId());
         Instant now = clock.instant();
@@ -50,6 +50,7 @@ public class OrderService {
         return transactionTemplate.execute(status -> {
             Order order = new Order();
             order.setUserId(userId);
+            order.setUserEmail(userEmail);
             order.setEventId(event.id());
             order.setEventTitle(event.title());
             order.setQuantity(request.quantity());
@@ -101,7 +102,8 @@ public class OrderService {
         order.setFailureReason(FailureReason.QUOTA);
         order.setUpdatedAt(clock.instant());
         publisher.publishAfterCommit(ORDER_FAILED, new OrderFailedEvent(
-                orderId, ORDER_FAILED, clock.instant(), order.getUserId(), FailureReason.QUOTA.name()));
+                orderId, ORDER_FAILED, clock.instant(), order.getUserId(), order.getUserEmail(),
+                FailureReason.QUOTA.name()));
     }
 
     @Transactional
@@ -113,7 +115,7 @@ public class OrderService {
         order.setStatus(OrderStatus.COMPLETED);
         order.setUpdatedAt(clock.instant());
         publisher.publishAfterCommit(ORDER_COMPLETED, new OrderCompletedEvent(
-                orderId, ORDER_COMPLETED, clock.instant(), order.getUserId(), order.getEventTitle(),
+                orderId, ORDER_COMPLETED, clock.instant(), order.getUserId(), order.getUserEmail(), order.getEventTitle(),
                 order.getQuantity()));
     }
 
@@ -129,6 +131,9 @@ public class OrderService {
         publisher.publishAfterCommit(ORDER_CANCELLED, new OrderCancelledEvent(
                 orderId, ORDER_CANCELLED, clock.instant(), order.getUserId(), order.getEventId(),
                 order.getQuantity(), FailureReason.TICKET.name()));
+        publisher.publishAfterCommit(ORDER_FAILED, new OrderFailedEvent(
+                orderId, ORDER_FAILED, clock.instant(), order.getUserId(), order.getUserEmail(),
+                FailureReason.TICKET.name()));
     }
 
     /**

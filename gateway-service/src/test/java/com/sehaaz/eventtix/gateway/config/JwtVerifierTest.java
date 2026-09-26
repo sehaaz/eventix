@@ -27,7 +27,7 @@ class JwtVerifierTest {
     void validToken_returnsClaims() {
         String token = sign(HS256_HEADER, payload("42", "USER", NOW.plusSeconds(60)), SECRET);
 
-        assertThat(verifier.verify(token)).contains(new JwtVerifier.Claims("42", "USER"));
+        assertThat(verifier.verify(token)).contains(new JwtVerifier.Claims("42", "USER", "u@test.com"));
     }
 
     @Test
@@ -68,6 +68,14 @@ class JwtVerifierTest {
     }
 
     @Test
+    void missingEmail_isRejected() {
+        String token = sign(HS256_HEADER, "{\"sub\":\"42\",\"role\":\"USER\",\"exp\":"
+                + NOW.plusSeconds(60).getEpochSecond() + "}", SECRET);
+
+        assertThat(verifier.verify(token)).isEmpty();
+    }
+
+    @Test
     void garbage_isRejected() {
         assertThat(verifier.verify("not-a-jwt")).isEmpty();
         assertThat(verifier.verify("a.b.c")).isEmpty();
@@ -80,7 +88,8 @@ class JwtVerifierTest {
     }
 
     private static String payload(String sub, String role, Instant exp) {
-        return "{\"sub\":\"" + sub + "\",\"role\":\"" + role + "\",\"exp\":" + exp.getEpochSecond() + "}";
+        return "{\"sub\":\"" + sub + "\",\"role\":\"" + role + "\",\"email\":\"u@test.com\",\"exp\":"
+                + exp.getEpochSecond() + "}";
     }
 
     private static String sign(String header, String payload, String secret) {

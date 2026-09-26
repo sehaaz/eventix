@@ -7,6 +7,7 @@ public record OrderFailedEvent(
         String eventType,
         Instant occurredAt,
         Long userId,
+        String userEmail,
         String reason
 ) implements SagaEvent {
 }

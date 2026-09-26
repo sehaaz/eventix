@@ -23,14 +23,16 @@ import java.util.List;
 public class OrderController {
 
     private static final String USER_ID_HEADER = "X-User-Id";
+    private static final String USER_EMAIL_HEADER = "X-User-Email";
 
     private final OrderService orderService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderResponse create(@RequestHeader(USER_ID_HEADER) Long userId,
+                                @RequestHeader(USER_EMAIL_HEADER) String userEmail,
                                 @Valid @RequestBody CreateOrderRequest request) {
-        return orderService.create(userId, request);
+        return orderService.create(userId, userEmail, request);
     }
 
     @GetMapping("/me")

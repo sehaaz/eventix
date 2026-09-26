@@ -24,6 +24,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     public static final String USER_ID_HEADER = "X-User-Id";
     public static final String USER_ROLE_HEADER = "X-User-Role";
+    public static final String USER_EMAIL_HEADER = "X-User-Email";
 
     private static final String BEARER_PREFIX = "Bearer ";
     private static final PathPattern AUTH_PATHS = PathPatternParser.defaultInstance.parse("/api/auth/**");
@@ -42,6 +43,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
                 .headers(h -> {
                     h.remove(USER_ID_HEADER);
                     h.remove(USER_ROLE_HEADER);
+                    h.remove(USER_EMAIL_HEADER);
                 })
                 .build();
         PathContainer path = request.getPath().pathWithinApplication();
@@ -65,6 +67,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         ServerHttpRequest authenticated = request.mutate()
                 .header(USER_ID_HEADER, claims.get().userId())
                 .header(USER_ROLE_HEADER, claims.get().role())
+                .header(USER_EMAIL_HEADER, claims.get().email())
                 .build();
         return chain.filter(exchange.mutate().request(authenticated).build());
     }

@@ -1,0 +1,28 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: notification-service
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: 1025
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    username: ${RABBITMQ_USER:eventtix}
+    password: ${RABBITMQ_PASSWORD:eventtix}
+    listener:
+      simple:
+        # 3 deneme başarısızsa mesaj requeue edilmez, x-dead-letter-exchange ile DLQ'ya düşer.
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1s
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
